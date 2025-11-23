@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Galaxia ID Creator — Sci-Fi Experience</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="overlay-game" class="overlay-game hidden">
+  <div class="game-panel">
+    <h2>🔒 Intrusion Required</h2>
+    <p>To access the Galaxia system, identify the correct alien symbol.</p>
+
+    <div id="symbols" class="symbols"></div>
+
+    <p id="game-msg" class="game-msg"></p>
+  </div>
+</div>
+
+<div class="wrap hidden" id="app">
+  <header>
+    <h1>Galaxia ID Creator</h1>
+    <div class="controls">
+      <button id="createMode" class="btn">Create ID</button>
+      <button id="detectMode" class="btn btn-ghost">Detective Mode</button>
+      <button id="randomAgent" class="btn btn-accent">Generate Random Agent</button>
+    </div>
+  </header>
+
+  <main id="main"></main>
+
+  <footer>
+    Assets must be located in <code>avatars/</code> and <code>flags/</code>.
+  </footer>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
