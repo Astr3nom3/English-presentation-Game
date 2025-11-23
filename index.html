@@ -1,51 +1,40 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<title>IDetector — Sci-Fi ID Creator (V2)</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>IDetector — Sci-Fi NeoTech</title>
 
-<!-- Styles externes -->
+<!-- Style -->
 <link rel="stylesheet" href="style.css">
-
+<!-- html2canvas for PNG export -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
+
 <body>
+<div class="wrap">
 
-<!-- 🔵 OVERLAY MINI-GAME (Alien Authentication) -->
-<div id="overlay-game" class="overlay">
-  <div class="overlay-box">
-    <h2>GALACTIC ACCESS PROTOCOL</h2>
-    <p>Select the correct alien symbol to authenticate.</p>
-    <div id="symbols" class="symbol-grid"></div>
-    <p id="game-msg" class="game-message"></p>
-  </div>
-</div>
-
-<!-- 🔵 APPLICATION CONTENT (Hidden until mini-game is passed) -->
-<div id="app" class="hidden">
-
-  <header class="top-bar">
+  <header>
     <h1>IDetector — Sci-Fi ID Creator</h1>
-
     <div class="controls">
-      <button id="createMode" class="btn">Create ID</button>
-      <button id="detectMode" class="btn btn-ghost">Detective Mode</button>
-      <button id="randomAgent" class="btn btn-accent">Random Agent</button>
+      <button id="createMode" class="btn btn-accent">Create ID</button>
+      <button id="detectMode" class="btn">Detective Mode</button>
     </div>
   </header>
 
   <main id="main"></main>
 
   <footer>
-    <p class="muted">
-      IMPORTANT: This ID is fictional and stylized for learning / entertainment.  
-      Falsifying real documents is illegal.
-    </p>
+    <p>NeoTech Edition — Galactic ID Creator © 2125</p>
   </footer>
-
 </div>
 
-<!-- JS externe -->
+<!-- Galactic Scan Overlay -->
+<div id="scan-overlay">
+  <div class="scan-line"></div>
+</div>
+
+<!-- Script -->
 <script src="script.js"></script>
 
 </body>
