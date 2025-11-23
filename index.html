@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>IDetector — Sci-Fi ID Creator (with external avatars/flags)</title>
+<style>
+  :root{
+    --bg-0: #07172a;
+    --bg-1: #0b1b2a;
+    --panel: #0e2436;
+    --accent: #7c3aed;
+    --primary: #2563eb;
+    --text: #dbeeff;     /* main readable text on dark bg */
+    --muted: #9fb8ff;
+    --good: #16a34a;
+    --bad: #dc2626;
+  }
+  html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;background:linear-gradient(180deg,var(--bg-0),var(--bg-1));color:var(--text)}
+  .wrap{max-width:1100px;margin:20px auto;padding:12px}
+  header{display:flex;align-items:center;gap:12px}
+  h1{font-size:20px;margin:0}
+  .controls{margin-left:auto;display:flex;gap:8px}
+  .btn{background:var(--primary);border:0;color:white;padding:8px 12px;border-radius:10px;cursor:pointer;font-weight:600}
+  .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--text)}
+  .panel{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));padding:16px;border-radius:12px;margin-top:16px;border:1px solid rgba(255,255,255,0.03)}
+  .grid{display:grid;grid-template-columns:1fr 420px;gap:18px}
+  label{display:block;margin:8px 0;color:var(--text);font-size:14px}
+  input,select{width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:rgba(255,255,255,0.02);color:var(--text);font-size:14px}
+  .muted{color:var(--muted);font-size:13px}
+  .card{width:420px;height:260px;border-radius:12px;padding:14px;position:relative;background:linear-gradient(180deg,#071833,#07172a);box-shadow:0 8px 32px rgba(3,6,18,0.6);border:1px solid rgba(255,255,255,0.02)}
+  .meta{position:absolute;right:14px;top:12px;color:var(--muted);font-size:12px}
+  .pv-bottom{position:absolute;left:14px;bottom:12px;color:var(--muted);font-size:12px}
+  .photo{width:130px;height:170px;border-radius:8px;overflow:hidden;background:#081424;border:1px solid rgba(255,255,255,0.03);box-shadow:0 8px 20px rgba(2,6,23,0.7)}
+  .info{display:inline-block;vertical-align:top;margin-left:14px;max-width:260px}
+  .field-title{font-size:13px;color:var(--muted)}
+  .field-value{font-weight:700;font-size:16px;color:var(--text)}
+  .flag{width:54px;height:36px;border-radius:6px;border:1px solid rgba(255,255,255,0.03);vertical-align:middle;margin-left:8px}
+  footer{margin-top:18px;color:var(--muted);font-size:13px}
+  @media(max-width:980px){.grid{grid-template-columns:1fr}.card{width:100%}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>IDetector — Sci-Fi ID Creator</h1>
+    <div class="controls">
+      <button id="createMode" class="btn">Create ID</button>
+      <button id="detectMode" class="btn btn-ghost">Detective Mode</button>
+    </div>
+  </header>
+
+  <main id="main"></main>
+
+  <footer>
+    Tip: include the folders <code>avatars/</code> and <code>flags/</code> next to this <code>index.html</code>. File names must match the list provided. This project uses stylized sci-fi avatars (non-photorealistic).
+  </footer>
+</div>
+
+<script>
+/* ----------------- CONFIG ----------------- */
+const NATIONALITIES = [
+  {id:'terra', label:'Terran (Earth)'},
+  {id:'aurelion', label:'Aurelian (Aurelia)'},
+  {id:'kaldor', label:'Kaltorian (Kaldor)'},
+  {id:'veshara', label:'Veshari (Vesha)'},
+  {id:'zorvia', label:'Zorvian (Zorvia)'}
+];
+
+const RACES = [
+  {id:'human', label:'Human'},
+  {id:'aurelian', label:'Aurelian (avian)'},
+  {id:'kaltorian', label:'Kaltorian (reptilian)'},
+  {id:'vesharian', label:'Vesharian (energy being)'},
+  {id:'zorvian', label:'Zorvian (insectoid)'},
+  {id:'synth', label:'Synth (android)'}
+];
+
+const SEXES = ['Male','Female','Other'];
+
+/* ----------------- Deterministic factions per planet (2..5) ----------------- */
+function seededRandom(seed){
+  let h=2166136261>>>0;
+  for(let i=0;i<seed.length;i++){ h ^= seed.charCodeAt(i); h += (h<<1)+(h<<4)+(h<<7)+(h<<8)+(h<<24); }
+  return function(){
+    h += 0x6D2B79F5;
+    var t = Math.imul(h ^ h>>>15, 1 | h);
+    t ^= t + Math.imul(t ^ t>>>7, 61 | t);
+    return ((t ^ t>>>14) >>> 0)/4294967296;
+  };
+}
+function factionCount(planetId){
+  const r = seededRandom(planetId)();
+  return 2 + Math.floor(r*4); // 2..5
+}
+function generateFactions(planetId){
+  const adjectives = ['Nova','Crimson','Azure','Silver','Obsidian','Radiant','Iron','Solar','Lunar','Vanguard','Silent','Echo'];
+  const nouns = ['Guard','Consortium','Union','Syndicate','Collective','Order','Fleet','Guild','House','Conclave'];
+  const rnd = seededRandom(planetId + '_f');
+  const n = factionCount(planetId);
+  const out = [];
+  for(let i=0;i<n;i++){
+    const a = adjectives[Math.floor(rnd()*adjectives.length)];
+    const b = nouns[Math.floor(rnd()*nouns.length)];
+    out.push(`${a} ${b}`);
+  }
+  return out;
+}
+
+/* ----------------- Paths for avatars & flags -----------------
+  REQUIRED filenames (place these inside avatars/ and flags/ next to index.html):
+  Avatars (avatars/):
+    human_male.png, human_female.png, human_other.png
+    aurelian_male.png, aurelian_female.png, aurelian_other.png
+    kaltorian_male.png, kaltorian_female.png, kaltorian_other.png
+    vesharian_male.png, vesharian_female.png, vesharian_other.png
+    zorvian_male.png, zorvian_female.png, zorvian_other.png
+    synth_male.png, synth_female.png, synth_other.png
+
+  Flags (flags/):
+    terra.png, aurelion.png, kaldor.png, veshara.png, zorvia.png
+--------------------------------------------------------------*/
+
+function avatarPath(raceId, sex){
+  const s = (sex||'other').toLowerCase();
+  return `avatars/${raceId}_${s}.png`;
+}
+function flagPath(planetId){
+  return `flags/${planetId}.png`;
+}
+
+/* ----------------- UI Rendering ----------------- */
+const main = document.getElementById('main');
+document.getElementById('createMode').onclick = renderCreator;
+document.getElementById('detectMode').onclick = renderDetector;
+
+function renderCreator(){
+  main.innerHTML = `
+    <div class="panel">
+      <div class="grid">
+        <div>
+          <label>Full name <input id="name" value="Nova Star"></label>
+          <label>Role / Title <input id="role" value="Explorer"></label>
+          <label>Birth date (fictional) <input id="dob" value="2124-07-08"></label>
+
+          <label>Nationality (planet)
+            <select id="nationality"><option value="">-- choose planet --</option></select>
+          </label>
+
+          <label>Faction
+            <select id="faction" disabled><option>(select planet first)</option></select>
+          </label>
+
+          <label>Race
+            <select id="race"></select>
+          </label>
+
+          <label>Sex
+            <select id="sex"></select>
+          </label>
+
+          <div style="margin-top:12px;display:flex;gap:8px">
+            <button id="generate" class="btn">Generate preview</button>
+            <button id="download" class="btn" style="background:var(--accent)">Download PNG</button>
+          </div>
+
+          <p class="muted" style="margin-top:10px">
+            IMPORTANT: This ID is purely fictional and stylized for learning / entertainment. Falsifying real documents is illegal.
+          </p>
+        </div>
+
+        <div>
+          <div class="card" id="preview">
+            <div class="meta">GALAXIA ID</div>
+            <div style="display:flex;gap:14px;align-items:flex-start">
+              <div class="photo" id="pvPhoto">
+                <!-- img inserted here -->
+              </div>
+              <div class="info">
+                <div class="field-title">Name</div>
+                <div class="field-value" id="pvName">Nova Star</div>
+
+                <div style="height:6px"></div>
+                <div class="field-title">Role</div>
+                <div class="muted" id="pvRole">Explorer</div>
+
+                <div style="height:10px"></div>
+                <div class="field-title">DOB</div>
+                <div class="muted" id="pvDob">2124-07-08</div>
+
+                <div style="height:6px"></div>
+                <div class="field-title">Sex</div>
+                <div class="muted" id="pvSex">Other</div>
+
+                <div style="height:6px"></div>
+                <div class="field-title">Race</div>
+                <div class="muted" id="pvRace">Human</div>
+
+                <div style="height:6px"></div>
+                <div class="field-title">Nationality <img id="pvFlag" class="flag" src="" alt="flag"></div>
+                <div class="muted" id="pvNation">Terran (Earth)</div>
+              </div>
+            </div>
+
+            <div class="pv-bottom" id="pvFaction">Faction: —</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // populate selects
+  const natSel = document.getElementById('nationality');
+  NATIONALITIES.forEach(n => natSel.insertAdjacentHTML('beforeend', `<option value="${n.id}">${n.label}</option>`));
+  const raceSel = document.getElementById('race');
+  RACES.forEach(r => raceSel.insertAdjacentHTML('beforeend', `<option value="${r.id}">${r.label}</option>`));
+  const sexSel = document.getElementById('sex');
+  SEXES.forEach(s => sexSel.insertAdjacentHTML('beforeend', `<option value="${s}">${s}</option>`));
+
+  // events
+  document.getElementById('nationality').onchange = onNationalityChange;
+  document.getElementById('generate').onclick = updatePreview;
+  document.getElementById('download').onclick = downloadPNG;
+
+  // initial preview
+  updatePreview();
+}
+
+function onNationalityChange(){
+  const nat = document.getElementById('nationality').value;
+  const factionSel = document.getElementById('faction');
+  factionSel.innerHTML = '';
+  if(!nat){
+    factionSel.disabled = true;
+    factionSel.innerHTML = '<option>(select planet first)</option>';
+  } else {
+    const list = generateFactions(nat);
+    list.forEach((f,i)=> factionSel.insertAdjacentHTML('beforeend', `<option value="${i}">${f}</option>`));
+    factionSel.disabled = false;
+    factionSel.selectedIndex = 0;
+  }
+  updatePreview();
+}
+
+function updatePreview(){
+  const name = document.getElementById('name')?.value.trim() || 'Unnamed';
+  const role = document.getElementById('role')?.value.trim() || '';
+  const dob = document.getElementById('dob')?.value.trim() || '';
+  const nat = document.getElementById('nationality')?.value || 'terra';
+  const race = document.getElementById('race')?.value || 'human';
+  const sex = document.getElementById('sex')?.value || 'Other';
+  const factionIdx = document.getElementById('faction')?.value;
+
+  document.getElementById('pvName').textContent = name;
+  document.getElementById('pvRole').textContent = role || '—';
+  document.getElementById('pvDob').textContent = dob || '—';
+  document.getElementById('pvSex').textContent = sex;
+  document.getElementById('pvRace').textContent = (RACES.find(r=>r.id===race)||{}).label || '';
+  document.getElementById('pvNation').textContent = (NATIONALITIES.find(n=>n.id===nat)||{}).label || '';
+
+  const factions = nat ? generateFactions(nat) : [];
+  const factionText = (typeof factionIdx !== 'undefined' && factionIdx !== null && factions[factionIdx]) ? factions[factionIdx] : '—';
+  document.getElementById('pvFaction').textContent = `Faction: ${factionText}`;
+
+  // set flag image (uses flags/<planet>.png)
+  const flagEl = document.getElementById('pvFlag');
+  const fpath = flagPath(nat);
+  flagEl.src = fpath;
+  flagEl.alt = nat + ' flag';
+  flagEl.onerror = ()=>{ flagEl.style.display='none'; } // hide if missing
+
+  // set avatar image (uses avatars/<race>_<sex>.png)
+  const photoEl = document.getElementById('pvPhoto');
+  const apath = avatarPath(race, sex);
+  // create image element with fallback if missing
+  photoEl.innerHTML = `<img id="pvImg" src="${apath}" alt="portrait" style="width:100%;height:100%;object-fit:cover">`;
+  const pvImg = document.getElementById('pvImg');
+  pvImg.onerror = function(){
+    // fallback: use 'other' or a placeholder
+    if(sex && sex.toLowerCase()!=='other'){
+      const fallback = avatarPath(race, 'other');
+      if(this.src.indexOf(fallback)===-1){ this.src = fallback; return; }
+    }
+    // final fallback: simple placeholder canvas data URL
+    const canvas = document.createElement('canvas'); canvas.width=300; canvas.height=400;
+    const ctx = canvas.getContext('2d'); ctx.fillStyle='#0b1220'; ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle='#9fb8ff'; ctx.font='20px Arial'; ctx.textAlign='center';
+    ctx.fillText('No avatar', canvas.width/2, canvas.height/2);
+    this.src = canvas.toDataURL();
+  };
+}
+
+/* ----------------- Download as PNG ----------------- */
+function downloadPNG(){
+  // build composed canvas using DOM values and images
+  const name = document.getElementById('name')?.value.trim() || 'Unnamed';
+  const role = document.getElementById('role')?.value.trim() || '';
+  const dob = document.getElementById('dob')?.value.trim() || '';
+  const nat = document.getElementById('nationality')?.value || 'terra';
+  const race = document.getElementById('race')?.value || 'human';
+  const sex = document.getElementById('sex')?.value || 'Other';
+  const factions = nat ? generateFactions(nat) : [];
+  const factionIdx = document.getElementById('faction')?.value;
+  const factionText = (typeof factionIdx !== 'undefined' && factionIdx !== null && factions[factionIdx]) ? factions[factionIdx] : '—';
+
+  const avatarSrc = avatarPath(race, sex);
+  const flagSrc = flagPath(nat);
+
+  // canvas size higher for better quality
+  const W = 1200, H = 780;
+  const canvas = document.createElement('canvas'); canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+
+  // background
+  ctx.fillStyle = '#07172a'; ctx.fillRect(0,0,W,H);
+
+  // load images then draw
+  const imgAvatar = new Image();
+  const imgFlag = new Image();
+  let loaded = 0;
+  function tryDraw(){
+    loaded++;
+    if(loaded < 2) return;
+    // avatar area
+    const ax = 80, ay = 80, aw = 360, ah = 470;
+    // draw avatar (with border)
+    ctx.fillStyle = '#071424'; ctx.fillRect(ax-8,ay-8,aw+16,ah+16);
+    ctx.drawImage(imgAvatar, ax, ay, aw, ah);
+
+    // text block
+    ctx.fillStyle = '#dbeeff'; ctx.font = 'bold 48px Arial';
+    ctx.fillText(name, 480, 160);
+    ctx.font = '28px Arial'; ctx.fillStyle = '#9fb8ff';
+    ctx.fillText(role || '—', 480, 210);
+
+    ctx.font = '22px Arial'; ctx.fillStyle = '#cfe6ff';
+    ctx.fillText('DOB: ' + (dob || '—'), 480, 270);
+    ctx.fillText('Sex: ' + sex, 480, 310);
+    ctx.fillText('Race: ' + (RACES.find(r=>r.id===race)||{}).label, 480, 350);
+    ctx.fillText('Nationality: ' + (NATIONALITIES.find(n=>n.id===nat)||{}).label, 480, 390);
+    ctx.fillText('Faction: ' + factionText, 480, 430);
+
+    // flag
+    ctx.drawImage(imgFlag, 1000, 100, 140, 96);
+
+    // meta label
+    ctx.fillStyle = '#8fb9ff'; ctx.font = '20px Arial'; ctx.fillText('GALAXIA ID', 980, 220);
+
+    // done
+    const a = document.createElement('a'); a.download = 'fictional-id.png'; a.href = canvas.toDataURL('image/png'); a.click();
+  }
+
+  // load avatar (with error fallback to 'other' then placeholder)
+  imgAvatar.onload = tryDraw;
+  imgAvatar.onerror = function(){
+    // try fallback other
+    const fallback = avatarPath(race, 'other');
+    if(avatarSrc !== fallback){
+      imgAvatar.src = fallback;
+    } else {
+      // create placeholder
+      const cv = document.createElement('canvas'); cv.width=aw; cv.height=ah;
+      const c2 = cv.getContext('2d'); c2.fillStyle='#081424'; c2.fillRect(0,0,cv.width,cv.height);
+      c2.fillStyle='#9fb8ff'; c2.font='36px Arial'; c2.textAlign='center'; c2.fillText('No avatar', cv.width/2, cv.height/2);
+      imgAvatar.src = cv.toDataURL();
+    }
+  };
+  imgFlag.onload = tryDraw;
+  imgFlag.onerror = function(){ 
+    // create tiny placeholder flag
+    const cv = document.createElement('canvas'); cv.width=140; cv.height=96;
+    const c2 = cv.getContext('2d'); c2.fillStyle='#223'; c2.fillRect(0,0,cv.width,cv.height);
+    c2.fillStyle='#9fb8ff'; c2.font='18px Arial'; c2.fillText('No flag', 10, 50);
+    imgFlag.src = cv.toDataURL();
+  };
+
+  imgAvatar.src = avatarSrc;
+  imgFlag.src = flagSrc;
+}
+
+/* ----------------- Detective mode (simple) ----------------- */
+function renderDetector(){
+  main.innerHTML = `
+    <div class="panel">
+      <h2 style="margin-top:0">Detective Mode — Find the inconsistency</h2>
+      <p class="muted">Click the card that looks inconsistent. Look for typos, mismatched race vs planet, or odd dates. (All fictional.)</p>
+      <div id="cards" style="display:flex;gap:12px;flex-wrap:wrap;margin-top:12px"></div>
+      <div style="margin-top:12px"><button id="back" class="btn btn-ghost">Back to Creator</button></div>
+    </div>
+  `;
+  const cardsDiv = document.getElementById('cards');
+  const examples = [
+    {name:'Nova Star', role:'Explorer', dob:'2124-07-08', nat:'terra', race:'human', sex:'Female', bad:false},
+    {name:'Ori Kellan', role:'Merchant', dob:'2118-03-22', nat:'orion', race:'aurelian', sex:'Male', bad:false},
+    {name:'L0ra-9', role:'Pilot', dob:'2099-11-11', nat:'kaldor', race:'kaltorian', sex:'Other', bad:false},
+    {name:'Max Storm', role:'Explorerrs', dob:'2130-02-05', nat:'veshara', race:'kaltorian', sex:'Male', bad:true} // deliberate error
+  ];
+  examples.sort(()=>Math.random()-0.5);
+  examples.forEach(c=>{
+    const container = document.createElement('div'); container.style.width='240px'; container.style.cursor='pointer';
+    const avatarUrl = avatarPath(c.race, c.sex);
+    const flagUrl = flagPath(c.nat);
+    container.innerHTML = `
+      <div style="background:linear-gradient(180deg,#07172a,#071b2e);padding:10px;border-radius:8px">
+        <div style="display:flex;gap:10px;align-items:center">
+          <div style="width:72px;height:100px;border-radius:6px;overflow:hidden;border:1px solid rgba(255,255,255,0.03)"><img src="${avatarUrl}" style="width:100%;height:100%;object-fit:cover"></div>
+          <div>
+            <div style="color:var(--text);font-weight:700">${escapeHtml(c.name)}</div>
+            <div style="color:var(--muted)">${escapeHtml(c.role)}</div>
+            <div style="color:var(--muted);margin-top:6px">DOB: ${escapeHtml(c.dob)}</div>
+            <img src="${flagUrl}" style="width:68px;height:46px;margin-top:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.03)">
+          </div>
+        </div>
+      </div>
+    `;
+    container.onclick = ()=>{
+      if(c.bad){ container.style.outline = '3px solid var(--good)'; alert('Correct — this card contains inconsistencies (typo & mismatch). This is a fictional exercise.'); }
+      else { container.style.outline = '3px solid var(--bad)'; alert('Not the one — look for typos, mismatched race/flag, or impossible dates.'); }
+    };
+    cardsDiv.appendChild(container);
+  });
+
+  document.getElementById('back').onclick = ()=>{ renderCreator(); updatePreview(); };
+}
+
+/* ----------------- helpers ----------------- */
+function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+/* ----------------- initial load ----------------- */
+renderCreator();
+updatePreview();
+
+</script>
+</body>
+</html>
