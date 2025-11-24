@@ -1,34 +1,56 @@
 <!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Galactica ID — NeoTech Edition</title>
-  <link rel="stylesheet" href="style.css">
-</head>
+<input id="faction" type="text" />
 
-<body>
 
-<!-- Overlay d'authentification -->
-<div id="overlay-auth" class="overlay active">
-  <div class="auth-box">
-    <h2>SCAN GALACTIQUE</h2>
-    <p>Confirme ton identité pour accéder au système.</p>
-    <button id="authStart" class="btn">Démarrer le scan</button>
-  </div>
+<label>Race</label>
+<select id="race">
+<option>Human</option>
+<option>Synth</option>
+<option>Aetherian</option>
+<option>Biomorph</option>
+</select>
+
+
+<label>Sex</label>
+<select id="sex">
+<option>Male</option>
+<option>Female</option>
+<option>Non-Binary</option>
+</select>
+
+
+<div class="actions">
+<button onclick="generatePreview()">Generate preview</button>
+<button onclick="downloadID()">Download PNG</button>
+</div>
 </div>
 
-<div id="app" class="hidden">
-  <header>
-    <h1>Galactica ID — NeoTech Edition</h1>
-    <div class="controls">
-      <button id="createMode" class="btn">Créer une ID</button>
-      <button id="randomAgent" class="btn btn-ghost">Générer un agent</button>
-    </div>
-  </header>
 
-  <main id="main"></main>
+<div class="id-preview">
+<h2 class="id-title">GALAXIA ID</h2>
+
+
+<img id="preview-avatar" class="avatar" src="avatars/avatar1.png" />
+
+
+<p><strong>Name:</strong> <span id="preview-name">—</span></p>
+<p><strong>Role:</strong> <span id="preview-role">—</span></p>
+<p><strong>DOB:</strong> <span id="preview-dob">—</span></p>
+<p><strong>Sex:</strong> <span id="preview-sex">—</span></p>
+<p><strong>Race:</strong> <span id="preview-race">—</span></p>
+
+
+<p><strong>Nationality:</strong>
+<img id="preview-flag" class="flag" src="flags/aurelia.png" />
+</p>
+
+
+<p><strong>Faction:</strong> <span id="preview-faction">—</span></p>
 </div>
+
+
+</section>
+
 
 <script src="script.js"></script>
 </body>
