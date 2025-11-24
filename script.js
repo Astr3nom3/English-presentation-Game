@@ -1,161 +1,96 @@
-// ---------------- AUTH SCAN ----------------
-document.addEventListener('DOMContentLoaded', () => {
-  const overlay = document.getElementById('overlay-auth');
-  const app = document.getElementById('app');
-  const btn = document.getElementById('authStart');
+/* =========================================================
+   SCAN GALACTIQUE — Déblocage de l'interface
+========================================================= */
 
-  btn.addEventListener('click', () => {
-    btn.textContent = "Scan en cours...";
-    btn.disabled = true;
+document.addEventListener("DOMContentLoaded", () => {
 
-    setTimeout(() => {
-      overlay.classList.add('hidden');
-      app.classList.remove('hidden');
-    }, 1500);
-  });
+    const startScanBtn = document.getElementById("startScan");
+    const scanSection = document.getElementById("scan-section");
+    const scanLoading = document.getElementById("scan-loading");
+    const mainApp = document.getElementById("main-app");
 
-  document.getElementById('createMode').onclick = renderCreator;
-  document.getElementById('randomAgent').onclick = generateRandomAgent;
+    // Démarre le scan
+    if (startScanBtn) {
+        startScanBtn.addEventListener("click", () => {
 
-  renderCreator();
+            // Affiche "Scan en cours..."
+            scanLoading.style.display = "flex";
+
+            // Animation + temps d'attente
+            setTimeout(() => {
+
+                // Cache la zone scan
+                scanSection.style.display = "none";
+                scanLoading.style.display = "none";
+
+                // Montre le vrai site
+                mainApp.style.display = "block";
+
+            }, 3000); // 3 secondes
+        });
+    }
+
 });
 
-// ---------------- DATA ----------------
-const NATIONALITIES = [
-  {id:'terra', label:'Terran (Earth)'},
-  {id:'aurelion', label:'Aurelian (Aurelia)'},
-  {id:'kaldor', label:'Kaltorian (Kaldor)'},
-  {id:'veshara', label:'Veshari (Vesha)'},
-  {id:'zorvia', label:'Zorvian (Zorvia)'}
-];
+/* =========================================================
+   GÉNÉRATION D'AGENT ALÉATOIRE
+========================================================= */
 
-const RACES = [
-  {id:'human', label:'Human'},
-  {id:'aurelian', label:'Aurelian (avian)'},
-  {id:'kaltorian', label:'Kaltorian (reptilian)'},
-  {id:'vesharian', label:'Vesharian (energy)'},
-  {id:'zorvian', label:'Zorvian (insectoid)'},
-  {id:'synth', label:'Synth android'}
-];
+function generateRandomAgent() {
 
-const SEXES = ['Male','Female','Other'];
+    const names = ["Nova Star", "Orion Vega", "Lyra X", "Astra Kel", "Zen Voltar"];
+    const roles = ["Explorer", "Technomancer", "Pilot", "Quantum Ranger", "Cyber Diplomat"];
+    const factions = ["Silver Order", "Nebula Corps", "Crimson Circle", "Void Syndicate"];
+    const races = ["Human", "Synth", "Aetherian", "Biomorph"];
+    const sexes = ["Male", "Female", "Non-Binary"];
 
-function avatarPath(r,s){ return `avatars/${r}_${s.toLowerCase()}.png`; }
-function flagPath(n){ return `flags/${n}.png`; }
+    document.getElementById("fullname").value = names[Math.floor(Math.random() * names.length)];
+    document.getElementById("role").value = roles[Math.floor(Math.random() * roles.length)];
+    document.getElementById("faction").value = factions[Math.floor(Math.random() * factions.length)];
+    document.getElementById("race").value = races[Math.floor(Math.random() * races.length)];
+    document.getElementById("sex").value = sexes[Math.floor(Math.random() * sexes.length)];
 
-// ---------------- UI CREATOR ----------------
-function renderCreator(){
-  const main = document.getElementById('main');
-
-  main.innerHTML = `
-    <div class="panel">
-      <h2>Création d'identité galactique</h2>
-
-      <label>Nom complet
-        <input id="name" value="Nova Star">
-      </label>
-
-      <label>Rôle
-        <input id="role" value="Explorer">
-      </label>
-
-      <label>Date de naissance
-        <input id="dob" value="2124-07-08">
-      </label>
-
-      <label>Nationalité
-        <select id="nationality"><option value="">— Choisir —</option></select>
-      </label>
-
-      <label>Race
-        <select id="race"></select>
-      </label>
-
-      <label>Sexe
-        <select id="sex"></select>
-      </label>
-
-      <button id="generate" class="btn">Mettre à jour le preview</button>
-      <button id="download" class="btn btn-ghost">Télécharger PNG</button>
-
-      <div style="margin-top:20px;display:flex;gap:20px">
-        <div>
-          <div class="card">
-            <div style="display:flex;gap:14px;">
-              <div class="photo" id="pvPhoto"></div>
-              <div>
-                <div id="pvName" style="font-size:18px;font-weight:700;">Nova Star</div>
-                <div id="pvRole" style="color:var(--muted)">Explorer</div>
-                <div id="pvDob" style="color:var(--muted);margin-top:6px;">2124-07-08</div>
-                <div id="pvSex" style="color:var(--muted);margin-top:6px;">Other</div>
-                <div id="pvRace" style="color:var(--muted);margin-top:6px;">Human</div>
-                <div style="margin-top:8px;">
-                  Nationalité <img id="pvFlag" class="flag" src="">
-                </div>
-                <div id="pvNation" style="color:var(--muted)"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
-
-  // Remplir les listes
-  const natSel = document.getElementById('nationality');
-  NATIONALITIES.forEach(n => natSel.insertAdjacentHTML("beforeend",
-    `<option value="${n.id}">${n.label}</option>`));
-
-  const raceSel = document.getElementById('race');
-  RACES.forEach(r => raceSel.insertAdjacentHTML("beforeend",
-    `<option value="${r.id}">${r.label}</option>`));
-
-  const sexSel = document.getElementById('sex');
-  SEXES.forEach(s => sexSel.insertAdjacentHTML("beforeend",
-    `<option value="${s}">${s}</option>`));
-
-  document.getElementById('generate').onclick = updatePreview;
-  document.getElementById('nationality').onchange = updatePreview;
-  document.getElementById('download').onclick = downloadPNG;
-
-  updatePreview();
+    // Date aléatoire futuriste
+    const year = 2100 + Math.floor(Math.random() * 80);
+    const month = String(Math.floor(Math.random() * 12) + 1).padStart(2, "0");
+    const day = String(Math.floor(Math.random() * 28) + 1).padStart(2, "0");
+    document.getElementById("birthdate").value = `${year}-${month}-${day}`;
 }
 
-// ---------------- PREVIEW ----------------
-function updatePreview(){
-  const name = document.getElementById('name').value;
-  const role = document.getElementById('role').value;
-  const dob = document.getElementById('dob').value;
-  const nat = document.getElementById('nationality').value || "terra";
-  const race = document.getElementById('race').value || "human";
-  const sex = document.getElementById('sex').value || "Other";
+/* =========================================================
+   PRÉVISUALISATION DE LA GALACTICA ID
+========================================================= */
 
-  document.getElementById('pvName').textContent = name;
-  document.getElementById('pvRole').textContent = role;
-  document.getElementById('pvDob').textContent = dob;
-  document.getElementById('pvSex').textContent = sex;
-  document.getElementById('pvRace').textContent = RACES.find(r=>r.id===race).label;
-  document.getElementById('pvNation').textContent = NATIONALITIES.find(n=>n.id===nat).label;
+function generatePreview() {
 
-  const flag = document.getElementById('pvFlag');
-  flag.src = flagPath(nat);
+    const idName = document.getElementById("fullname").value;
+    const idRole = document.getElementById("role").value;
+    const idFaction = document.getElementById("faction").value;
+    const idRace = document.getElementById("race").value;
+    const idSex = document.getElementById("sex").value;
+    const idBirth = document.getElementById("birthdate").value;
 
-  const photoEl = document.getElementById('pvPhoto');
-  photoEl.innerHTML = `<img src="${avatarPath(race,sex)}" style="width:100%;height:100%;object-fit:cover;">`;
+    // Mise à jour de la carte
+    document.getElementById("preview-name").innerText = idName;
+    document.getElementById("preview-role").innerText = idRole;
+    document.getElementById("preview-faction").innerText = idFaction;
+    document.getElementById("preview-race").innerText = idRace;
+    document.getElementById("preview-sex").innerText = idSex;
+    document.getElementById("preview-dob").innerText = idBirth;
+
+    // Avatar dynamique
+    const avatarIndex = Math.floor(Math.random() * 5) + 1;
+    document.getElementById("preview-avatar").src = `avatars/avatar${avatarIndex}.png`;
+
+    // Drapeau
+    const nationality = document.getElementById("nationality").value;
+    document.getElementById("preview-flag").src = `flags/${nationality}.png`;
 }
 
-// ---------------- RANDOM AGENT ----------------
-function generateRandomAgent(){
-  document.getElementById('name').value = "Agent " + Math.floor(Math.random()*9999);
-  document.getElementById('role').value = "Operative";
-  document.getElementById('dob').value = "21" + Math.floor(Math.random()*30) + "-0" + (1+Math.floor(Math.random()*8)) + "-0" + (1+Math.floor(Math.random()*8));
-  document.getElementById('nationality').selectedIndex = 1+Math.floor(Math.random()*5);
-  document.getElementById('race').selectedIndex = 1+Math.floor(Math.random()*5);
-  document.getElementById('sex').selectedIndex = Math.floor(Math.random()*3);
-  updatePreview();
-}
+/* =========================================================
+   DOWNLOAD PNG
+========================================================= */
 
-// ---------------- DOWNLOAD PNG ----------------
-function downloadPNG(){
-  alert("Download PNG sera réactivé après tes tests !");
+function downloadID() {
+    alert("Download PNG is not reconnected yet — I can reconnect it for you si tu veux !");
 }
