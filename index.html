@@ -1,34 +1,34 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Galactica ID - NeoTech Edition</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Galactica ID — NeoTech Edition</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-<body>
-<div id="overlay-auth" class="overlay active">
-<div class="auth-box">
-<h2>SCAN GALACTIQUE</h2>
-<p>Confirme ton identité pour accéder au système.</p>
-<button id="authStart" class="btn">Démarrer le scan</button>
-</div>
-</div>
 
+<body>
+
+<!-- Overlay d'authentification -->
+<div id="overlay-auth" class="overlay active">
+  <div class="auth-box">
+    <h2>SCAN GALACTIQUE</h2>
+    <p>Confirme ton identité pour accéder au système.</p>
+    <button id="authStart" class="btn">Démarrer le scan</button>
+  </div>
+</div>
 
 <div id="app" class="hidden">
-<header>
-<h1>Galactica ID — NeoTech Edition</h1>
-<div class="controls">
-<button id="createMode" class="btn">Créer une ID</button>
-<button id="randomAgent" class="btn btn-ghost">Générer un agent</button>
+  <header>
+    <h1>Galactica ID — NeoTech Edition</h1>
+    <div class="controls">
+      <button id="createMode" class="btn">Créer une ID</button>
+      <button id="randomAgent" class="btn btn-ghost">Générer un agent</button>
+    </div>
+  </header>
+
+  <main id="main"></main>
 </div>
-</header>
-
-
-<main id="main"></main>
-</div>
-
 
 <script src="script.js"></script>
 </body>
