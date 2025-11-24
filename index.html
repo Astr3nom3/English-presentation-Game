@@ -1,55 +1,35 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="fr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>IDetector — Sci-Fi NeoTech (V2)</title>
-
-  <!-- Style -->
-  <link rel="stylesheet" href="style.css">
-
-  <!-- html2canvas for PNG export -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Galactica ID - NeoTech Edition</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
+<div id="overlay-auth" class="overlay active">
+<div class="auth-box">
+<h2>SCAN GALACTIQUE</h2>
+<p>Confirme ton identité pour accéder au système.</p>
+<button id="authStart" class="btn">Démarrer le scan</button>
+</div>
+</div>
 
-  <!-- INITIAL ALIEN AUTHENTICATION OVERLAY -->
-  <div id="overlay-auth" class="overlay active">
-    <div class="overlay-box">
-      <h2>GALACTIC ACCESS PROTOCOL</h2>
-      <p>Select the correct alien symbol to authenticate.</p>
-      <div id="auth-symbols" class="symbol-grid"></div>
-      <p id="auth-msg" class="game-message"></p>
-    </div>
-  </div>
 
-  <!-- APP -->
-  <div class="wrap hidden" id="app">
-    <header>
-      <h1>IDetector — Sci-Fi NeoTech</h1>
-      <div class="controls">
-        <button id="createMode" class="btn btn-accent">Create ID</button>
-        <button id="detectMode" class="btn">Detective Mode</button>
-        <button id="detectChallenge" class="btn">Detective Challenge</button>
-        <button id="randomAgent" class="btn">Random Agent</button>
-      </div>
-    </header>
+<div id="app" class="hidden">
+<header>
+<h1>Galactica ID — NeoTech Edition</h1>
+<div class="controls">
+<button id="createMode" class="btn">Créer une ID</button>
+<button id="randomAgent" class="btn btn-ghost">Générer un agent</button>
+</div>
+</header>
 
-    <main id="main"></main>
 
-    <footer>
-      <p class="muted">NeoTech Edition — Galactic ID Creator © 2125</p>
-    </footer>
-  </div>
+<main id="main"></main>
+</div>
 
-  <!-- GALACTIC SCAN OVERLAY (used on download and scan fail) -->
-  <div id="scan-overlay">
-    <div class="scan-line"></div>
-  </div>
 
-  <!-- SFX optional (can be expanded) -->
-  <!-- <audio id="scan-sound" src="sounds/scan.wav" preload="auto"></audio> -->
-
-  <script src="script.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
